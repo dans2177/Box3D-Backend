@@ -1,10 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const {
-  setupKinde,
-  jwtVerify,
-} = require("@kinde-oss/kinde-node-express");
+const { setupKinde, jwtVerify } = require("@kinde-oss/kinde-node-express");
 const cors = require("cors");
 
 const config = {
@@ -15,18 +12,45 @@ const config = {
   redirectUrl: "http://localhost:3000",
 };
 const verifier = jwtVerify("https://shemonindustries.kinde.com");
+// Mock filament data
+const mockFilamentData = [
+  {
+    id: 1,
+    type: "PLA",
+    color: "Red",
+    weight: "1kg",
+    temperature: "200°C",
+  },
+  {
+    id: 2,
+    type: "ABS",
+    color: "Blue",
+    weight: "0.5kg",
+    temperature: "230°C",
+  },
+  // Add more filament items as needed
+];
 
 app.use(cors());
 
 setupKinde(config, app);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.json("data", mockFilamentData);
+  console.log("Hello World!");
 });
 
-app.get("/some-route", jwtVerify, (req, res) => {
-  res.json({ message: "Hello World!" });
+// Route to fetch filament data
+app.get("/filament-data", verifier, (req, res) => {
+  console.log("Fetching filament data...");
   console.log(req.user);
+  try {
+    // Send back the mock filament data
+    res.json({ data: mockFilamentData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 app.listen(port, () => {
