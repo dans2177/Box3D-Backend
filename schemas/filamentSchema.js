@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const filamentSchema = new mongoose.Schema({
   user_id: {
     type: String,
-    required: [true, "User email is required"],
-    match: [/\S+@\S+\.\S+/, "Please use a valid email address"],
+    required: [true, "User id is required"],
   },
   name: {
     type: String,
@@ -31,6 +30,4 @@ const filamentSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Filament", filamentSchema);
-
-
+const Filament = mongoose.model("Filament", filamentSchema);
