@@ -1,5 +1,9 @@
 const Filament = require("../schemas/filamentSchema");
 
+//----------------------------------------------------------------
+//FILAMENT CONTROLLERS
+
+//Get User Filaments
 exports.getFilaments = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming this is how you get the user's ID
@@ -22,7 +26,7 @@ exports.getFilaments = async (req, res) => {
   }
 };
 
-//Post Filament
+//Post User Filament
 exports.postFilament = async (req, res) => {
   try {
     console.log("Posting filament data for user: ", req.user.id);
@@ -47,3 +51,56 @@ exports.postFilament = async (req, res) => {
     console.log("Received token:", req.headers.authorization);
   }
 };
+
+//----------------------------------------------------------------
+// SUBTRACTION CONTROLLERS
+
+//Create Subtraction
+exports.createSubtraction = async (req, res) => {
+  try {
+    const { filamentId, subtractionLength } = req.body;
+    const filament = await Filament.findById(filamentId);
+
+    // Check if filament exists
+    if (!filament) {
+      return res.status(404).json({ message: "Filament not found" });
+    }
+
+    // Add the new subtraction
+    filament.subtractions.push({ subtractionLength });
+
+    filament.recalculateCurrentAmount();
+
+    await filament.save();
+    res.json({ data: filament });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//Delete Subtraction
+exports.deleteSubtraction = async (req, res) => {
+  try {
+    const { filamentId, subtractionId } = req.body;
+    const filament = await Filament.findById(filamentId);
+
+    // Check if filament exists
+    if (!filament) {
+      return res.status(404).json({ message: "Filament not found" });
+    }
+
+    // Remove the subtraction
+    filament.subtractions.id(subtractionId).remove();
+
+    filament.recalculateCurrentAmount();
+
+    await filament.save();
+    res.json({ data: filament }).status(200);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//----------------------------------------------------------------

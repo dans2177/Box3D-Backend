@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Subtraction Schema -- Nested in Filament Schema (Below)
 const subtractionSchema = new mongoose.Schema({
   subtractionLength: {
     type: Number,
@@ -16,6 +17,8 @@ const subtractionSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Filament Schema
 const filamentSchema = new mongoose.Schema({
   user_id: {
     type: String,
@@ -33,6 +36,10 @@ const filamentSchema = new mongoose.Schema({
     min: [0, "Starting amount cannot be negative"],
     required: [true, "Starting amount is required"],
   },
+  currentAmmount: {
+    type: Number,
+    min: [0, "Current amount cannot be negative"],
+  },
   notes: String,
   size: String,
   temperature: String,
@@ -46,6 +53,12 @@ const filamentSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+filamentSchema.methods.recalculateCurrentAmount = function () {
+  this.currentAmount =
+    this.startingAmount -
+    this.subtractions.reduce((total, sub) => total + sub.subtractionLength, 0);
+};
 
 const Filament = mongoose.model("Filament", filamentSchema);
 
