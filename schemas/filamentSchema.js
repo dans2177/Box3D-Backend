@@ -15,6 +15,7 @@ const subtractionSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now,
+    format: 'Y-m-d',
   },
 });
 
@@ -29,6 +30,7 @@ const filamentSchema = new mongoose.Schema({
     required: [true, "Name is required"],
   },
   color: String,
+  type: String,
   manufacturer: String,
   material: String,
   startingAmount: {
@@ -36,7 +38,7 @@ const filamentSchema = new mongoose.Schema({
     min: [0, "Starting amount cannot be negative"],
     required: [true, "Starting amount is required"],
   },
-  currentAmmount: {
+  currentAmount: {
     type: Number,
     min: [0, "Current amount cannot be negative"],
   },

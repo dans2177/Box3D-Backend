@@ -1,9 +1,9 @@
 const Filament = require("../schemas/filamentSchema");
 
 //----------------------------------------------------------------
-//FILAMENT CONTROLLERS
+// FILAMENT CONTROLLERS
 
-//Get User Filaments
+// Get User Filaments
 exports.getFilaments = async (req, res) => {
   try {
     const userId = req.user.id; // Assuming this is how you get the user's ID
@@ -26,9 +26,10 @@ exports.getFilaments = async (req, res) => {
   }
 };
 
-//Post User Filament
+// Post User Filament
 exports.postFilament = async (req, res) => {
   try {
+    console.log("Received POST request to create a new filament.");
     console.log("Posting filament data for user: ", req.user.id);
 
     // Create a new filament
@@ -36,9 +37,11 @@ exports.postFilament = async (req, res) => {
       user_id: req.user.id,
       name: req.body.name,
       color: req.body.color,
+      type: req.body.type,
       manufacturer: req.body.manufacturer,
       material: req.body.material,
       startingAmount: req.body.startingAmount,
+      currentAmount: req.body.startingAmount,
       notes: req.body.notes,
       size: req.body.size,
       temperature: req.body.temperature,
@@ -58,8 +61,16 @@ exports.updateFilament = async (req, res) => {
     const filamentId = req.params.filamentId;
     const updateData = req.body;
 
+    console.log(
+      "Received PUT request to update filament with ID: ",
+      filamentId
+    );
+
     // Find the filament and update it
-    const filament = await Filament.findByIdAndUpdate(filamentId, updateData, { new: true });
+    const filament = await Filament.findByIdAndUpdate(filamentId, updateData, {
+      new: true,
+    });
+    console.log(filament);
 
     if (!filament) {
       return res.status(404).json({ message: "Filament not found" });
@@ -77,16 +88,27 @@ exports.deleteFilament = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
 
+    console.log(
+      "Received DELETE request to delete filament with ID: ",
+      filamentId
+    );
+
     // Delete the filament
     const filament = await Filament.findByIdAndDelete(filamentId);
-
+    console.log("Deleting user Filament", filamentId);
     if (!filament) {
+      // If filament not found, send 404 response
       return res.status(404).json({ message: "Filament not found" });
     }
 
-    res.json({ message: "Filament deleted successfully" });
+    // If filament found and deleted, send success response with filamentId
+    res.json({
+      message: "Filament deleted successfully",
+      filamentId: filamentId,
+    });
   } catch (error) {
     console.error(error);
+    // Send server error response
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -95,6 +117,8 @@ exports.deleteFilament = async (req, res) => {
 exports.getFilament = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
+    console.log("Received GET request to fetch filament with ID: ", filamentId);
+
     const filament = await Filament.findById(filamentId);
 
     if (!filament) {
@@ -108,23 +132,45 @@ exports.getFilament = async (req, res) => {
   }
 };
 
-
 //----------------------------------------------------------------
 // SUBTRACTION CONTROLLERS
-
 // Create Subtraction
 exports.createSubtraction = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
-    const { subtractionLength, project, date } = req.body;
+    const { subtractionLength } = req.body;
+
+    console.log(
+      "Received POST request to create a new subtraction for filament with ID: ",
+      filamentId
+    );
 
     // Find the filament and add the new subtraction
     const filament = await Filament.findById(filamentId);
-    filament.subtractions.push({ subtractionLength, project, date });
-    filament.recalculateCurrentAmount(); // Recalculate the current amount
+    if (!filament) {
+      return res.status(404).json({ message: "Filament not found" });
+    }
+
+    // Create a new subtraction
+    const newSubtraction = {
+      subtractionLength,
+    };
+
+    // Add the new subtraction to the subtractions array
+    filament.subtractions.push(newSubtraction);
+
+    // Recalculate the current amount based on the updated subtractions
+    filament.recalculateCurrentAmount();
+
+    // Save the filament with the new subtraction and updated currentAmount
     await filament.save();
 
-    res.status(201).json({ message: "Subtraction added successfully", data: filament });
+    // Sending back the newly added subtraction along with updated filament data
+    res.status(201).json({
+      message: "Subtraction added successfully",
+      data: filament,
+      newSubtraction: filament.subtractions[filament.subtractions.length - 1], // Last element in the array
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -135,6 +181,11 @@ exports.createSubtraction = async (req, res) => {
 exports.getSubtractions = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
+    console.log(
+      "Received GET request to fetch subtractions for filament with ID: ",
+      filamentId
+    );
+
     const filament = await Filament.findById(filamentId);
 
     if (!filament) {
@@ -155,14 +206,24 @@ exports.updateSubtraction = async (req, res) => {
     const subtractionId = req.params.subtractionId;
     const updateData = req.body;
 
+    console.log(
+      "Received PUT request to update subtraction with ID: ",
+      subtractionId
+    );
+
     // Find the filament and update the specific subtraction
     const filament = await Filament.findById(filamentId);
     const subtraction = filament.subtractions.id(subtractionId);
+
     if (subtraction) {
       Object.assign(subtraction, updateData);
       filament.recalculateCurrentAmount(); // Recalculate the current amount
       await filament.save();
-      res.json({ message: "Subtraction updated successfully", data: subtraction });
+      console.log(filament);
+      res.json({
+        message: "Subtraction updated successfully",
+        data: subtraction,
+      });
     } else {
       res.status(404).json({ message: "Subtraction not found" });
     }
@@ -177,6 +238,11 @@ exports.deleteSubtraction = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
     const subtractionId = req.params.subtractionId;
+
+    console.log(
+      "Received DELETE request to delete subtraction with ID: ",
+      subtractionId
+    );
 
     // Find the filament and remove the specific subtraction
     const filament = await Filament.findById(filamentId);
@@ -194,6 +260,3 @@ exports.deleteSubtraction = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
-//----------------------------------------------------------------
