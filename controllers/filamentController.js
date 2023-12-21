@@ -164,6 +164,7 @@ exports.createSubtraction = async (req, res) => {
 
     // Save the filament with the new subtraction and updated currentAmount
     await filament.save();
+    console.log(filament);
 
     // Sending back the newly added subtraction along with updated filament data
     res.status(201).json({
