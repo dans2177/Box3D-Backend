@@ -15,7 +15,7 @@ const subtractionSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now,
-    format: 'Y-m-d',
+    format: "Y-m-d",
   },
 });
 
@@ -31,7 +31,7 @@ const filamentSchema = new mongoose.Schema({
   },
   color: String,
   type: String,
-  manufacturer: String,
+  link: String,
   material: String,
   startingAmount: {
     type: Number,

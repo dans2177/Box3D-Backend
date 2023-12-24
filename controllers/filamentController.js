@@ -1,8 +1,5 @@
 const Filament = require("../schemas/filamentSchema");
 
-//----------------------------------------------------------------
-// FILAMENT CONTROLLERS
-
 // Get User Filaments
 exports.getFilaments = async (req, res) => {
   try {
@@ -19,9 +16,10 @@ exports.getFilaments = async (req, res) => {
         .status(200)
         .json({ message: "No inventory found for this user." });
     }
-    res.json({ data: filaments });
+
+    res.status(200).json({ data: filaments });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching filaments:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -38,7 +36,7 @@ exports.postFilament = async (req, res) => {
       name: req.body.name,
       color: req.body.color,
       type: req.body.type,
-      manufacturer: req.body.manufacturer,
+      link: req.body.link,
       material: req.body.material,
       startingAmount: req.body.startingAmount,
       currentAmount: req.body.startingAmount,
@@ -47,11 +45,12 @@ exports.postFilament = async (req, res) => {
       temperature: req.body.temperature,
     });
 
-    res.json({ data: filament });
+    res
+      .status(201)
+      .json({ message: "Filament created successfully", filament });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating filament:", error);
     res.status(500).json({ message: "Internal server error" });
-    console.log("Received token:", req.headers.authorization);
   }
 };
 
@@ -59,7 +58,6 @@ exports.postFilament = async (req, res) => {
 exports.updateFilament = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
-    const updateData = req.body;
 
     console.log(
       "Received PUT request to update filament with ID: ",
@@ -67,18 +65,24 @@ exports.updateFilament = async (req, res) => {
     );
 
     // Find the filament and update it
-    const filament = await Filament.findByIdAndUpdate(filamentId, updateData, {
-      new: true,
-    });
-    console.log(filament);
+    const updatedFilament = await Filament.findByIdAndUpdate(
+      filamentId,
+      req.body,
+      {
+        new: true,
+      }
+    );
 
-    if (!filament) {
+    if (!updatedFilament) {
       return res.status(404).json({ message: "Filament not found" });
     }
 
-    res.json({ message: "Filament updated successfully", data: filament });
+    res.status(200).json({
+      message: "Filament updated successfully",
+      data: updatedFilament,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating filament:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -94,21 +98,18 @@ exports.deleteFilament = async (req, res) => {
     );
 
     // Delete the filament
-    const filament = await Filament.findByIdAndDelete(filamentId);
-    console.log("Deleting user Filament", filamentId);
-    if (!filament) {
-      // If filament not found, send 404 response
+    const deletedFilament = await Filament.findByIdAndDelete(filamentId);
+
+    if (!deletedFilament) {
       return res.status(404).json({ message: "Filament not found" });
     }
 
-    // If filament found and deleted, send success response with filamentId
-    res.json({
+    res.status(200).json({
       message: "Filament deleted successfully",
       filamentId: filamentId,
     });
   } catch (error) {
-    console.error(error);
-    // Send server error response
+    console.error("Error deleting filament:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -117,6 +118,7 @@ exports.deleteFilament = async (req, res) => {
 exports.getFilament = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
+
     console.log("Received GET request to fetch filament with ID: ", filamentId);
 
     const filament = await Filament.findById(filamentId);
@@ -125,12 +127,15 @@ exports.getFilament = async (req, res) => {
       return res.status(404).json({ message: "Filament not found" });
     }
 
-    res.json({ data: filament });
+    res.status(200).json({ data: filament });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching filament:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Rest of the code for Subtraction Controllers remains the same
+// ...
 
 //----------------------------------------------------------------
 // SUBTRACTION CONTROLLERS
