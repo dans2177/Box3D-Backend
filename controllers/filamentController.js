@@ -77,6 +77,7 @@ exports.updateFilament = async (req, res) => {
       return res.status(404).json({ message: "Filament not found" });
     }
 
+    console.log(updatedFilament);
     res.status(200).json({
       message: "Filament updated successfully",
       data: updatedFilament,

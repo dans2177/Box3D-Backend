@@ -28,6 +28,7 @@ const filamentSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Name is required"],
+    maxlength: 5, // Set the maximum length for the name field to 5 characters
   },
   color: String,
   type: String,
