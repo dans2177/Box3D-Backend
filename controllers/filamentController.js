@@ -76,6 +76,7 @@ exports.updateFilament = async (req, res) => {
     if (!updatedFilament) {
       return res.status(404).json({ message: "Filament not found" });
     }
+    updatedFilament.recalculateCurrentAmount();
 
     console.log(updatedFilament);
     res.status(200).json({
@@ -135,8 +136,7 @@ exports.getFilament = async (req, res) => {
   }
 };
 
-// Rest of the code for Subtraction Controllers remains the same
-// ...
+
 
 //----------------------------------------------------------------
 // SUBTRACTION CONTROLLERS
@@ -240,7 +240,7 @@ exports.updateSubtraction = async (req, res) => {
   }
 };
 
-// Delete Subtraction
+//Delete Subtraction 
 exports.deleteSubtraction = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
@@ -251,17 +251,28 @@ exports.deleteSubtraction = async (req, res) => {
       subtractionId
     );
 
-    // Find the filament and remove the specific subtraction
+    // Find the filament by ID
     const filament = await Filament.findById(filamentId);
-    const subtraction = filament.subtractions.id(subtractionId);
-    if (subtraction) {
-      subtraction.remove();
-      filament.recalculateCurrentAmount(); // Recalculate the current amount
-      await filament.save();
-      res.json({ message: "Subtraction deleted successfully" });
-    } else {
-      res.status(404).json({ message: "Subtraction not found" });
+
+    if (!filament) {
+      return res.status(404).json({ message: "Filament not found" });
     }
+
+    // Use array filtering to remove the subtraction from subtractions array
+    filament.subtractions = filament.subtractions.filter(
+      (subtraction) => subtraction._id != subtractionId
+    );
+
+    // Recalculate the current amount
+    filament.recalculateCurrentAmount();
+
+    // Save the updated filament
+    await filament.save();
+
+    res.json({
+      message: "Subtraction deleted successfully",
+      subtractionId: subtractionId,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
