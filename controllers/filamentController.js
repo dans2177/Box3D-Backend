@@ -63,6 +63,7 @@ exports.updateFilament = async (req, res) => {
       "Received PUT request to update filament with ID: ",
       filamentId
     );
+    console.log(req.body);
 
     // Find the filament and update it
     const updatedFilament = await Filament.findByIdAndUpdate(
@@ -135,8 +136,6 @@ exports.getFilament = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
 
 //----------------------------------------------------------------
 // SUBTRACTION CONTROLLERS
@@ -240,7 +239,7 @@ exports.updateSubtraction = async (req, res) => {
   }
 };
 
-//Delete Subtraction 
+//Delete Subtraction
 exports.deleteSubtraction = async (req, res) => {
   try {
     const filamentId = req.params.filamentId;
