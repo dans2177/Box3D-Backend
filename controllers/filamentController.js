@@ -125,6 +125,7 @@ exports.getFilament = async (req, res) => {
     console.log("Received GET request to fetch filament with ID: ", filamentId);
 
     const filament = await Filament.findById(filamentId);
+    console.log(filament);
 
     if (!filament) {
       return res.status(404).json({ message: "Filament not found" });
