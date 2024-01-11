@@ -14,7 +14,7 @@ const projectSchema = new mongoose.Schema({
     default: Date.now,
   },
   notes: String,
-  pictures: [
+  pictures: [ 
     {
       type: String,
       match: [/^https?:\/\/.+/, "Please enter a valid URL"],
