@@ -9,7 +9,7 @@ require("dotenv").config();
 const app = express();
 app.use(express.json());
 const port = process.env.PORT || 3000;
-const verifier = jwtVerify("https://shemonindustries.kinde.com");
+const verifier = jwtVerify("https://account.3dlogbook.com");
 
 //Cors Setup
 const corsOptions = {

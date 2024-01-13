@@ -1,7 +1,9 @@
+require("dotenv").config();
+
 module.exports = {
-  clientId: "b98f8f1756d14105ad549351b5e67855",
-  issuerBaseUrl: "https://shemonindustries.kinde.com",
+  clientId: process.env.clientId,
+  issuerBaseUrl: "https://account.3dlogbook.com",
   siteUrl: "http://localhost:3000",
-  secret: "Qi7SowBpxxeOry1gRzyEfzrTe0gU21VBKFpRWqACz5R7POpMz8K",
+  secret: process.env.secret,
   redirectUrl: "http://localhost:3000",
 };
