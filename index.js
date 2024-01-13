@@ -8,16 +8,24 @@ require("dotenv").config();
 
 const app = express();
 app.use(express.json());
-const port = 3000;
+const port = process.env.PORT || 3000;
 const verifier = jwtVerify("https://shemonindustries.kinde.com");
 
+//Cors Setup
+const corsOptions = {
+  origin: "https://www.3dlogbook.com",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 // MongoDB Connection
 mongoose
   .connect(process.env.DB_URI, {})
   .then(() => console.log("Connected to MongoDB..."))
   .catch((err) => console.error("Could not connect to MongoDB:", err));
 
-app.use(cors());
 setupKinde(config, app);
 
 app.use("/filament-data", verifier, filamentRoutes);
@@ -26,4 +34,3 @@ app.use("/filament-data", verifier, filamentRoutes);
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-  
